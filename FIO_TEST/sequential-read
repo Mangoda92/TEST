@@ -1,0 +1,16 @@
+#!/bin/bash
+
+fio --name=mango_fio \
+    --filename=/dev/sdb \
+    --ioengine=libaio \
+    --rw=read \
+    --bs=128k \
+    --size=100% \
+    --numjobs=1 \
+    --iodepth=32 \
+    --direct=1 \
+    --invalidate=0 \
+    --runtime=10s \
+    --time_based \
+    --group_reporting
+
