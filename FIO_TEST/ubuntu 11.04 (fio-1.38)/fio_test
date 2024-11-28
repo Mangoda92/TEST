@@ -1,0 +1,55 @@
+#!/bin/bash
+
+echo -e "FIO Test Start!"
+echo -e " "
+
+echo -e "1.sequential-read"
+result_1=$(sequential-read)
+echo "$result_1"
+sqr=$(echo "$result_1" | grep -oP "bw=\d+[KMG]?[B/s]+")
+sleep 5
+echo -e " "
+
+echo -e "2.sequential-write"
+result_2=$(sequential-write)
+echo "$result_2"
+sqw=$(echo "$result_2" | grep -oP "bw=\d+[KMG]?[B/s]+")
+sleep 5
+echo -e " "
+
+echo -e "3.random-4K-read"
+result_3=$(random-4K-read)
+echo "$result_3"
+r4r=$(echo "$result_3" | grep -oP "iops=\K[\d]+[KMG]?")
+sleep 5
+echo -e " "
+
+echo -e "4.random-4K-write"
+result_4=$(random-4K-write)
+echo "$result_4"
+r4w=$(echo "$result_4" | grep -oP "iops=\K[\d]+[KMG]?")
+sleep 5
+echo -e " "
+
+echo -e "5.random-8K-read"
+result_5=$(random-8K-read)
+echo "$result_5"
+r8r=$(echo "$result_5" | grep -oP "iops=\K[\d]+[KMG]?")
+sleep 5
+echo -e " "
+
+echo -e "6.random-8K-write"
+result_6=$(random-8K-write)
+echo "$result_6"
+r8w=$(echo "$result_6" | grep -oP "iops=\K[\d]+[KMG]?")
+echo -e " "
+
+echo "1.squential-read : $sqr"
+echo "2.squential-write : $sqw"
+echo "3.random-4K-read : $r4r IOPS"
+echo "4.random-4K-write : $r4w IOPS"
+echo "5.random-8K-read : $r8r IOPS"
+echo "6.random-8K-write : $r8w IOPS"
+echo -e " "
+
+echo "FIO Test Finish!"
