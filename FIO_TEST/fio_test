@@ -28,7 +28,6 @@ echo -e "4.random-4K-write"
 result_4=$(random-4K-write)
 echo "$result_4"
 r4w=$(echo "$result_4" | grep -oP "IOPS=\K[\d\.]+[kMG]*")
-
 sleep 5
 echo -e " "
 
