@@ -44,12 +44,12 @@ echo "$result_6"
 r8w=$(echo "$result_6" | grep -oP "IOPS=\K[\d\.]+[kMG]*")
 echo -e " "
 
-echo "1.squential-read = $sqr"
-echo "2.squential-write = $sqw"
-echo "3.random-4K-read = $r4r"
-echo "4.random-4K-write = $r4w"
-echo "5.random-8K-read = $r8r"
-echo "6.random-8K-write = $r8w"
+echo "1.squential-read : $sqr"
+echo "2.squential-write : $sqw"
+echo "3.random-4K-read : $r4r"
+echo "4.random-4K-write : $r4w"
+echo "5.random-8K-read : $r8r"
+echo "6.random-8K-write : $r8w"
 echo -e " "
 
 echo "FIO Test Finish!"
