@@ -1,6 +1,6 @@
 #!/bin/bash
 
-fio --name=mango_fio \
+fio --name=piolink_fio \
     --filename=/dev/sdb \
     --ioengine=libaio \
     --rw=read \
