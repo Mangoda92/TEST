@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo -e "FIO Test Start!"
+
+echo -e "1.sequential-read"
+sequential-read
+sleep 5
+echo -e " "
+
+echo -e "2.sequential-write"
+sequential-write
+sleep 5
+echo -e " "
+
+echo -e "3.random-4K-read"
+random-4K-read
+sleep 5
+echo -e " "
+
+echo -e "4.random-4K-write"
+random-4K-write
+sleep 5
+echo -e " "
+
+echo -e "5.random-8K-read"
+random-8K-read
+sleep 5
+echo -e " "
+
+echo -e "6.random-8K-write"
+random-8K-write
+echo -e " "
+
+echo "FIO Test Finish!"
