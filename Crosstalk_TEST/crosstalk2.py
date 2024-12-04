@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 # 주어진 파라미터
 w1, w2 = 335e-6, 335e-6     # Line 1과 Line 2의 폭 (m)
 t1, t2 = 40e-6, 40e-6       # Line 1과 Line 2의 두께 (40 μm)
+we = w1 + t1
 h = 200e-6                  # 유전체 두께 (m)
-d = 635e-6                  # 두 선로 간 거리 (m)
+#d = 635e-6                  # 두 선로 간 거리 (m)
+d = 100e-6                    # 두 선로 간 거리 (m)
 L = 50e-3                   # 선로 길이 (m)
 er = 4.2                    # 상대 유전율 (FR4)
 tan_delta = 0.02            # 손실 탄젠트
@@ -28,13 +30,22 @@ dV_dt = v_step / tr         # 입력 신호의 변화율 (V/s)
 alpha_d = (np.pi * f * np.sqrt(er) * tan_delta) / c0
 
 # 정전 용량 계산
-C11 = e0 * er * (w1 + t1) / h   # C11 (단위 길이당 정전 용량, F/m)
-#C11 = e0 * er * (w1 + 2 * t1) / h  # C11 (단위 길이당 정전 용량, F/m) PCB TOP이 아닐시
-C12 = e0 * er * (w1 + t1) / d       # C12 (단위 길이당 결합 정전 용량, F/m)
 
-# 인덕턴스 계산
-L11 = Z0**2 * C11                   # L11 (단위 길이당 인덕턴스, H/m)
-L12 = L11 * (h / d)                 # L12 (단위 길이당 결합 인덕턴스, H/m)
+## C11 (단위 길이당 정전 용량)                                 
+C11 = e0 * er * (1 + 1 / np.sqrt(1 + 12 * (h / we))) * we / h   # Wheeler 1 PCB TOP
+#C11 = e0 * er * (1 + 1 / np.sqrt(1 + 12 * (h / we))) * we / h   # Wheeler 1 PCB TOP
+#C11 = e0 * er * (w1 + t1) / h                                  # 일반 PCB TOP   
+#C11 = e0 * er * we / (h * np.sqrt(1 + 12 * (h / we)))          # Wheeler 2 PCB TOP
+#C11 = e0 * er * (w1 + 2 * t1) / h                              # 
+
+## C12 (단위 길이당 결합 정전 용량
+C12 = e0 * er * (w1 + t1) / d                                   
+
+## L11 (단위 길이당 인덕턴스
+L11 = Z0**2 * C11                  
+
+## L12 (단위 길이당 결합 인덕턴스
+L12 = L11 * (h / d)                 
 
 # 지연 시간
 TD = L * (np.sqrt(L11 * C11))
@@ -47,13 +58,14 @@ NEXT = (v_step / 4) * ((L12 / L11) + (C12 / C11))  # NEXT 최대 전위
 FEXT = - ((v_step / 2) * TD / tr) * ((L12 / L11) - (C12 / C11))  # FEXT 최소 전위
 
 # 예제 값 (실제 계산값이 예제값과 일치해야 함)
-print(f"Calculated C11: {C11:.4e} V")
-print(f"Calculated C12: {C12:.4e} V")
-print(f"Calculated L11: {L11:.4e} V")
-print(f"Calculated L12: {L12:.4e} V")
+print(f"Calculated C11: {C11:.4e} F/m")
+print(f"Calculated C12: {C12:.4e} F/m")
+print(f"Calculated L11: {L11:.4e} F/m")
+print(f"Calculated L12: {L12:.4e} F/m")
 print(f"Calculated NEXT: {NEXT:.4e} V")
 print(f"Calculated FEXT: {FEXT:.4e} V")
 print(f"Calculated TD: {TD:.4e} s")
+print(f"Calculated c: {c:.4e} s")
 
 # 시간 축 생성 (시간을 2배 더 확장)
 time = np.linspace(0, 12 * tr, 1000)  # 라이징 타임 후 5배까지
