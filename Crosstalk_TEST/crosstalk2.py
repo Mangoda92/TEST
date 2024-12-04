@@ -6,8 +6,7 @@ w1, w2 = 335e-6, 335e-6     # Line 1과 Line 2의 폭 (m)
 t1, t2 = 40e-6, 40e-6       # Line 1과 Line 2의 두께 (40 μm)
 we = w1 + t1
 h = 200e-6                  # 유전체 두께 (m)
-#d = 635e-6                  # 두 선로 간 거리 (m)
-d = 100e-6                    # 두 선로 간 거리 (m)
+d = 635e-6                  # 두 선로 간 거리 (m)
 L = 50e-3                   # 선로 길이 (m)
 er = 4.2                    # 상대 유전율 (FR4)
 tan_delta = 0.02            # 손실 탄젠트
@@ -33,7 +32,6 @@ alpha_d = (np.pi * f * np.sqrt(er) * tan_delta) / c0
 
 ## C11 (단위 길이당 정전 용량)                                 
 C11 = e0 * er * (1 + 1 / np.sqrt(1 + 12 * (h / we))) * we / h   # Wheeler 1 PCB TOP
-#C11 = e0 * er * (1 + 1 / np.sqrt(1 + 12 * (h / we))) * we / h   # Wheeler 1 PCB TOP
 #C11 = e0 * er * (w1 + t1) / h                                  # 일반 PCB TOP   
 #C11 = e0 * er * we / (h * np.sqrt(1 + 12 * (h / we)))          # Wheeler 2 PCB TOP
 #C11 = e0 * er * (w1 + 2 * t1) / h                              # 
