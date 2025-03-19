@@ -6,7 +6,7 @@ import struct
 # SPI 설정
 spi = spidev.SpiDev()
 spi.open(0, 0)  # Raspberry Pi의 SPI Bus 0, Chip Select 0
-spi.max_speed_hz = 1000000    # SPI 속도 (1 MHz)
+spi.max_speed_hz = 10000000    # SPI 속도 (1 MHz)
 spi.bits_per_word = 8  # 8비트 데이터 전송 설정
 spi.mode = 0b00  # SPI 모드 3 (CPOL=1, CPHA=1)
 
@@ -58,6 +58,8 @@ ODR15_625_LPF3_906 = 0b1000
 ODR7_813_LPF1_953 = 0b1001
 ODR3_906_LPF0_977 = 0b1010
 
+SAMPLES = 500
+
 # 지구 중력 가속도 (m/s^2)
 G = 9.81 
 
@@ -81,10 +83,6 @@ def setup(START_TIME):
         writer = csv.writer(file)
         writer.writerow(["Time (s)", "X (m/s^2)", "Y (m/s^2)", "Z (m/s^2)"])
     
-
-    # 옵셋 설정
-    set_offset(65168, 16502, 64944)  # Raw Data 1 >> 4
-    time.sleep(1)
     '''
     DEVID_AD = read_register(0x00)
     print(f"DEVID_AD : {hex(DEVID_AD)}")
@@ -98,6 +96,11 @@ def setup(START_TIME):
     DEVID = read_register(0x03)
     print(f"DEVID : {hex(DEVID)}")
     '''
+
+    # 옵셋 설정
+    set_offset(0, 0, 0)  # Raw Data 1 >> 4
+    time.sleep(1)
+
     # 인터럽트 설정
     write_register(INT_MAP, 0x00) 
     time.sleep(1)  
@@ -107,7 +110,7 @@ def setup(START_TIME):
     time.sleep(1) 
 
     # 샘플링 속도 & LPF 설정 //HPF 비활성화
-    write_register(FILTER, ODR500_LPF125)
+    write_register(FILTER, ODR2000_LPF500)
     time.sleep(1) 
 
     # ADXL355을 측정 모드로 설정
@@ -149,6 +152,49 @@ def set_offset(offset_x, offset_y, offset_z):
     time.sleep(0.1)
     write_register(OFFSET_Z_L, offset_z & 0xFF)  # Z 하위 8비트
     time.sleep(0.1)
+
+def callibration(SAMPLES):
+
+    print(f"Calibrating offset using {SAMPLES} samples...")
+
+    X_OFFSET, Y_OFFSET, Z_OFFSET = 0, 0, 0  # 초기화
+
+    for i in range(SAMPLES):
+        X_RAW_H = read_register(XDATA3)
+        X_RAW_M = read_register(XDATA2)
+        X_RAW_L = read_register(XDATA1)
+        Y_RAW_H = read_register(YDATA3)
+        Y_RAW_M = read_register(YDATA2)
+        Y_RAW_L = read_register(YDATA1)
+        Z_RAW_H = read_register(ZDATA3)
+        Z_RAW_M = read_register(ZDATA2)
+        Z_RAW_L = read_register(ZDATA1)
+
+        X_RAW = (X_RAW_H << 12) | (X_RAW_M << 4) | (X_RAW_L >> 4)
+        Y_RAW = (Y_RAW_H << 12) | (Y_RAW_M << 4) | (Y_RAW_L >> 4)
+        Z_RAW = (Z_RAW_H << 12) | (Z_RAW_M << 4) | (Z_RAW_L >> 4)
+
+        # 오프셋 누적
+        X_OFFSET += (X_RAW >> 4)
+        Y_OFFSET += (Y_RAW >> 4)
+        Z_OFFSET += (Z_RAW >> 4)
+        
+        time.sleep(0.01)
+   
+    #print(f"합계 X: {X_OFFSET}, Y: {Y_OFFSET}, Z: {Z_OFFSET}")
+
+    # 평균 오프셋 계산
+    X_OFFSET //= SAMPLES
+    Y_OFFSET //= SAMPLES
+    Z_OFFSET //= SAMPLES
+
+    #print(f"나누기 X: {X_OFFSET}, Y: {Y_OFFSET}, Z: {Z_OFFSET}")
+
+    # 옵셋 설정
+    set_offset(X_OFFSET, Y_OFFSET, Z_OFFSET)  # Raw Data 1 >> 4
+    time.sleep(1)
+
+    print(f"Calibration complete!")
 
 def read_acceleration(START_TIME):
     CURRENT_TIME = time.time()
@@ -217,9 +263,11 @@ def main():
 
     setup(START_TIME)  # 센서 초기화 함수 호출
 
+    callibration(SAMPLES)
+
     while True:
         read_acceleration(START_TIME)  # 가속도 측정
-        time.sleep(0.002)
+        time.sleep(0.00001)
 
 if __name__ == "__main__":
     main()
